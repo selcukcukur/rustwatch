@@ -16,12 +16,25 @@ impl FileHandler {
 }
 
 impl Handler for FileHandler {
-  fn log(&mut self, record: &Record) {
-    let mut file = OpenOptions::new()
+  /// Log the record to a file.
+  ///
+  /// **Returns**
+  /// - `true` → If the record was successfully written
+  /// - `false` → If writing failed
+  fn log(&mut self, record: &Record) -> bool {
+    match OpenOptions::new()
       .create(true)
       .append(true)
       .open(&self.path)
-      .unwrap();
-    writeln!(file, "{}", self.formatter.format(record)).unwrap();
+    {
+      Ok(mut file) => {
+        if writeln!(file, "{}", self.formatter.format(record)).is_ok() {
+          true
+        } else {
+          false
+        }
+      }
+      Err(_) => false,
+    }
   }
 }

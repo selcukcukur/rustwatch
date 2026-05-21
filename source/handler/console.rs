@@ -13,7 +13,12 @@ impl ConsoleHandler {
 }
 
 impl Handler for ConsoleHandler {
-  fn log(&mut self, record: &Record) {
+  /// Log the record to the console.
+  ///
+  /// **Returns**
+  /// - `true` → Always returns true since console output never fails
+  fn log(&mut self, record: &Record) -> bool {
     println!("{}", self.formatter.format(record));
+    true
   }
 }

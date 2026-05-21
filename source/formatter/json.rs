@@ -28,7 +28,7 @@ impl Formatter for JsonFormatter {
   fn format(&self, record: &Record) -> String {
     json!({
             "timestamp": record.timestamp.to_rfc3339(),
-            "level": record.level.as_str(),
+            "level": record.level.name(),
             "message": record.message,
             "channel": record.channel,
             "context": record.context

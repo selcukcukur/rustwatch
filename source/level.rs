@@ -40,13 +40,13 @@ impl Level {
   pub fn name(&self) -> String {
     match self {
       Level::Emergency => "emergency".into(),
-      Level::Alert     => "alert".into(),
-      Level::Critical  => "critical".into(),
-      Level::Error     => "error".into(),
-      Level::Warning   => "warning".into(),
-      Level::Notice    => "notice".into(),
-      Level::Info      => "info".into(),
-      Level::Debug     => "debug".into(),
+      Level::Alert => "alert".into(),
+      Level::Critical => "critical".into(),
+      Level::Error => "error".into(),
+      Level::Warning => "warning".into(),
+      Level::Notice => "notice".into(),
+      Level::Info => "info".into(),
+      Level::Debug => "debug".into(),
       Level::Custom(s, _) => s.to_lowercase(),
     }
   }
@@ -59,12 +59,41 @@ impl Level {
     levels.contains(self)
   }
 
+
+  /// Returns the numeric severity value for this log level.
+  ///
+  /// - `Emergency` - **0** System is unusable, requires immediate attention.
+  /// - `Alert` - **1** Immediate action must be taken, critical alert.
+  /// - `Critical` - **2** Critical conditions, serious failures.
+  /// - `Error` - **3** Error conditions, runtime errors.
+  /// - `Warning` - **4** Warning conditions, potential issues.
+  /// - `Notice` - **5** Normal but significant events, noteworthy conditions.
+  /// - `Info` - **6** Informational messages, general system events.
+  /// - `Debug` - **7** Debug-level messages, detailed diagnostic information.
+  ///
+  /// Custom levels return their defined severity if provided,
+  /// otherwise `-1` because they do not have a defined numeric mapping.
+  pub fn severity(&self) -> i32 {
+    match self {
+      Level::Debug => 7,
+      Level::Info => 6,
+      Level::Notice => 5,
+      Level::Warning => 4,
+      Level::Error => 3,
+      Level::Critical => 2,
+      Level::Alert => 1,
+      Level::Emergency => 0,
+      Level::Custom(_, Some(v)) => *v,
+      Level::Custom(_, None) => -1,
+    }
+  }
+
   /// Returns true if this level has a lower severity than the other.
   ///
   /// **Parameters**
   /// - `other` - The `Level` to compare against.
   pub fn is_lower_than(&self, other: &Level) -> bool {
-    self.to_value() < other.to_value()
+    self.severity() < other.severity()
   }
 
   /// Returns true if this level has a higher severity than the other.
@@ -72,7 +101,7 @@ impl Level {
   /// **Parameters**
   /// - `other` - The `Level` to compare against.
   pub fn is_higher_than(&self, other: &Level) -> bool {
-    self.to_value() > other.to_value()
+    self.severity() > other.severity()
   }
 
   /// Constructs a `Level` from a string name (case-insensitive).
@@ -127,34 +156,6 @@ impl Level {
       6 => Level::Info,
       7 => Level::Debug,
       other => Level::Custom(other.to_string(), Some(other)),
-    }
-  }
-
-  /// Returns the numeric severity value for this log level.
-  ///
-  /// - `Emergency` - **0** System is unusable, requires immediate attention.
-  /// - `Alert` - **1** Immediate action must be taken, critical alert.
-  /// - `Critical` - **2** Critical conditions, serious failures.
-  /// - `Error` - **3** Error conditions, runtime errors.
-  /// - `Warning` - **4** Warning conditions, potential issues.
-  /// - `Notice` - **5** Normal but significant events, noteworthy conditions.
-  /// - `Info` - **6** Informational messages, general system events.
-  /// - `Debug` - **7** Debug-level messages, detailed diagnostic information.
-  ///
-  /// Custom levels return their defined severity if provided,
-  /// otherwise `-1` because they do not have a defined numeric mapping.
-  pub fn to_value(&self) -> i32 {
-    match self {
-      Level::Debug => 7,
-      Level::Info => 6,
-      Level::Notice => 5,
-      Level::Warning => 4,
-      Level::Error => 3,
-      Level::Critical => 2,
-      Level::Alert => 1,
-      Level::Emergency => 0,
-      Level::Custom(_, Some(v)) => *v,
-      Level::Custom(_, None) => -1,
     }
   }
 }

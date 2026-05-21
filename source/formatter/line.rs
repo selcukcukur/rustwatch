@@ -33,8 +33,8 @@ impl Formatter for LineFormatter {
     format!(
       "[{}] {} [{}]: {} {}",
       record.timestamp.to_rfc3339(),
-      record.level.as_str(),
-      record.channel.clone().unwrap_or_else(|| "-".to_string()),
+      record.level.name(),
+      record.channel.clone(),
       record.message,
       ctx_str
     )

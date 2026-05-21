@@ -6,8 +6,8 @@ use rustlog::handler::{console::ConsoleHandler, file::FileHandler};
 use serde_json::json;
 
 fn main() {
-  // Create a new logger instance
-  let mut logger = Logger::new();
+  // Logger instance with name + timezone
+  let mut logger = Logger::new("app", "Europe/Istanbul");
 
   // Add console handler with line formatter
   logger.add_handler(Box::new(ConsoleHandler::new(Box::new(LineFormatter))));
@@ -25,42 +25,36 @@ fn main() {
   logger.log(
     Level::Info,
     "Application started",
-    Some("system"),
     Some(json!({ "env": "dev", "version": "0.1.0" })),
   );
 
   logger.log(
     Level::Debug,
     "Debugging details here",
-    Some("debug"),
     Some(json!({ "trace_id": "xyz-789" })),
   );
 
   logger.log(
-    Level::Warn,
+    Level::Warning,
     "This is a warning",
-    Some("security"),
     Some(json!({ "ip": "192.168.1.10" })),
   );
 
   logger.log(
     Level::Error,
     "Something went wrong!",
-    Some("database"),
     Some(json!({ "query": "SELECT * FROM users", "duration_ms": 1200 })),
   );
 
   logger.log(
-    Level::custom("SECURITY"),
+    Level::Custom("SECURITY".to_string(), Some(8)),
     "Unauthorized access attempt",
-    Some("auth"),
     Some(json!({ "ip": "10.0.0.5", "method": "POST /login" })),
   );
 
   logger.log(
-    Level::custom("PERF"),
+    Level::Custom("PERF".to_string(), Some(9)),
     "High memory usage detected",
-    Some("monitoring"),
     Some(json!({ "memory_mb": 2048, "threshold": 1024 })),
   );
 }

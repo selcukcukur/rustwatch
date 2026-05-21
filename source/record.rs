@@ -1,108 +1,121 @@
 use crate::level::Level;
-use chrono::{Local, DateTime};
-use serde_json::Value;
+use chrono::{DateTime, Local};
+use chrono_tz::Tz;
+use serde_json::{Value, json};
 
-/// Represents a single log entry in the `rustlog` system
-///
-/// **Fields**
-/// - `level` - Log severity level (Info, Error, etc.)
-/// - `message` - The actual log message string
-/// - `timestamp` - Exact timestamp when the record was created
-/// - `context` - Flexible JSON context for extra metadata
-/// - `channel` - Logical channel or category (e.g. "auth", "db", "network")
-///
-/// # Example
-/// ```
-/// use rustlog::level::Level;
-/// use rustlog::record::Record;
-///
-/// let mut record = Record::new(Level::Error, "Database connection failed")
-///     .with_channel("db")
-///     .with_context(serde_json::json!({ "user": "selcuk", "request_id": "abc-123" }));
-///
-/// println!("{:?}", record);
-/// ```
 #[derive(Debug, Clone)]
 pub struct Record {
-  ///< Log severity
   pub level: Level,
-  ///< Log message
   pub message: String,
-  ///< Exact timestamp
-  pub timestamp: DateTime<Local>,
-  /// Flexible JSON context
+  pub timestamp: DateTime<Tz>,
   pub context: Value,
-  /// Logical channel/category
-  pub channel: Option<String>,
+  pub channel: String,
+  pub formatted: Option<String>,
 }
 
 impl Record {
-  /// Create a new log record with default empty context.
+  /// Create a new log record with all fields configurable.
   ///
   /// **Parameters**
-  /// - `level` - The severity level of the log (e.g. Info, Warn, Error)
-  /// - `message` - The log message string
+  /// - `level` - Log severity level
+  /// - `message` - Log message string
+  /// - `channel` - Channel/category name
+  /// - `context` - JSON context metadata (default: `{}`)
+  /// - `timestamp` - Exact timestamp (default: Local::now())
   ///
-  /// **Usage**
-  /// ```
-  /// use rustlog::level::Level;
-  /// use rustlog::record::Record;
-  ///
-  /// let record = Record::new(Level::Info, "Application started");
-  ///
-  /// println!("{:?}", record);
-  /// ```
-  pub fn new(level: Level, message: &str) -> Self {
+  /// **Returns**
+  /// - `Record` → A fully initialized log record
+  pub fn new(
+    level: Level,
+    message: &str,
+    channel: &str,
+    context: Option<Value>,
+    timestamp: DateTime<Tz>, // dışarıdan hazır verilecek
+  ) -> Self {
     Self {
       level,
       message: message.to_string(),
-      timestamp: Local::now(),
-      context: Value::Null,
-      channel: None,
+      timestamp, // direkt kullanılıyor
+      context: context.unwrap_or_else(|| Value::Object(serde_json::Map::new())),
+      channel: channel.to_string(),
+      formatted: None,
     }
   }
 
-  /// Attach a channel/category to the record.
-  ///
-  /// **Parameters**
-  /// - `channel` - A string representing the logical channel/category
-  ///
-  /// **Usage**
-  /// ```
-  /// use rustlog::level::Level;
-  /// use rustlog::record::Record;
-  ///
-  /// let record = Record::new(Level::Warn, "Slow query detected")
-  ///     .with_channel("database");
-  ///
-  /// println!("{:?}", record);
-  /// ```
-  pub fn with_channel(mut self, channel: &str) -> Self {
-    self.channel = Some(channel.to_string());
-    self
+
+  /// Get the channel/category of this record.
+  pub fn channel(&self) -> &String {
+    &self.channel
   }
 
-  /// Attach custom context to the record.
+  /// Get the JSON context attached to this record.
+  pub fn context(&self) -> &Value {
+    &self.context
+  }
+
+  /// Get the log level of this record.
+  pub fn level(&self) -> &Level {
+    &self.level
+  }
+
+  /// Get the severity value derived from the log level.
+  pub fn severity(&self) -> i32 {
+    self.level.severity()
+  }
+
+  /// Get the timestamp of when this record was created.
+  pub fn timestamp(&self) -> &DateTime<Tz> {
+    &self.timestamp
+  }
+
+  /// Override fields of the record with new values.
   ///
   /// **Parameters**
-  /// - `context` - Any type that can be converted into **serde_json::value**
+  /// - `level` - Optional new log level
+  /// - `message` - Optional new message string
+  /// - `channel` - Optional new channel name
+  /// - `context` - Optional new json context
+  /// - `timestamp` - Optional new timestamp
+  /// - `formatted` - Optional new formatted string
   ///
-  /// **Usage**
-  /// ```
-  /// use rustlog::level::Level;
-  /// use rustlog::record::Record;
-  ///
-  /// Record::new(Level::Info, "User login successful")
-  ///   .with_context(json!({
-  ///     "user": "selcuk",
-  ///     "ip": "192.168.1.10",
-  ///     "request_id": "abc-123"
-  ///   }));
-  ///
-  /// println!("{:?}", record);
-  /// ```
-  pub fn with_context<T: Into<Value>>(mut self, context: T) -> Self {
-    self.context = context.into();
-    self
+  /// **Returns**
+  /// - `Record` - A new record with updated fields
+  pub fn with(
+    &self,
+    level: Option<Level>,
+    message: Option<&str>,
+    channel: Option<&str>,
+    context: Option<Value>,
+    timestamp: Option<DateTime<Tz>>,
+    formatted: Option<&str>,
+  ) -> Self {
+    Self {
+      level: level.unwrap_or(self.level.clone()),
+      message: message.unwrap_or(&self.message).to_string(),
+      timestamp: timestamp.unwrap_or(self.timestamp),
+      context: context.unwrap_or(self.context.clone()),
+      channel: channel.unwrap_or(&self.channel).to_string(),
+      formatted: formatted.map(|f| f.to_string()).or_else(|| self.formatted.clone()),
+    }
+  }
+
+  /// Convert record to a JSON map.
+  pub fn to_array(&self) -> serde_json::Map<String, Value> {
+    let mut map = serde_json::Map::new();
+    map.insert("message".to_string(), Value::String(self.message.clone()));
+    map.insert("level".to_string(), Value::String(self.level.name().into()));
+    map.insert("severity".to_string(), Value::Number(self.severity().into()));
+    map.insert("channel".to_string(), Value::String(self.channel.clone()));
+    map.insert("timestamp".to_string(), Value::String(self.timestamp.to_rfc3339()));
+    map.insert("context".to_string(), self.context.clone());
+    if let Some(f) = &self.formatted {
+      map.insert("formatted".to_string(), Value::String(f.clone()));
+    }
+    map
+  }
+
+  /// Convert record to a JSON string.
+  pub fn to_json(&self) -> String {
+    Value::Object(self.to_array()).to_string()
   }
 }
