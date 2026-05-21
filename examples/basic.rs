@@ -3,6 +3,7 @@ use rustlog::level::Level;
 use rustlog::formatter::{line::LineFormatter, json::JsonFormatter};
 use rustlog::processor::context::ContextProcessor;
 use rustlog::handler::{console::ConsoleHandler, file::FileHandler};
+use serde_json::json;
 
 fn main() {
   // Create a new logger instance
@@ -20,9 +21,32 @@ fn main() {
     value: "selcuk".into(),
   }));
 
-  // Log some messages
-  logger.log(Level::Info, "Application started");
-  logger.log(Level::Debug, "Debugging details here");
-  logger.log(Level::Warn, "This is a warning");
-  logger.log(Level::Error, "Something went wrong!");
+  // Log some messages with channel + context
+  logger.log(
+    Level::Info,
+    "Application started",
+    Some("system"),
+    Some(json!({ "env": "dev", "version": "0.1.0" })),
+  );
+
+  logger.log(
+    Level::Debug,
+    "Debugging details here",
+    Some("debug"),
+    Some(json!({ "trace_id": "xyz-789" })),
+  );
+
+  logger.log(
+    Level::Warn,
+    "This is a warning",
+    Some("security"),
+    Some(json!({ "ip": "192.168.1.10" })),
+  );
+
+  logger.log(
+    Level::Error,
+    "Something went wrong!",
+    Some("database"),
+    Some(json!({ "query": "SELECT * FROM users", "duration_ms": 1200 })),
+  );
 }
