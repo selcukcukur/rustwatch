@@ -31,14 +31,12 @@ pub struct ContextProcessor {
 
 impl Processor for ContextProcessor {
   fn process(&self, record: &mut Record) {
-    // Eğer context boşsa yeni bir JSON obje oluştur
     let mut ctx = if record.context.is_null() {
       json!({})
     } else {
       record.context.clone()
     };
 
-    // JSON obje ise key/value ekle
     if let Some(obj) = ctx.as_object_mut() {
       obj.insert(self.key.clone(), json!(self.value));
     }

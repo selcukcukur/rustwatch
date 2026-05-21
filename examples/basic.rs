@@ -49,4 +49,18 @@ fn main() {
     Some("database"),
     Some(json!({ "query": "SELECT * FROM users", "duration_ms": 1200 })),
   );
+
+  logger.log(
+    Level::custom("SECURITY"),
+    "Unauthorized access attempt",
+    Some("auth"),
+    Some(json!({ "ip": "10.0.0.5", "method": "POST /login" })),
+  );
+
+  logger.log(
+    Level::custom("PERF"),
+    "High memory usage detected",
+    Some("monitoring"),
+    Some(json!({ "memory_mb": 2048, "threshold": 1024 })),
+  );
 }
