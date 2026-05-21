@@ -19,8 +19,9 @@ pub enum Level {
   Info,
   /// Debug-level messages, detailed diagnostic information
   Debug,
-  ///
-  Custom(String),
+  /// User-defined custom log level, allows arbitrary string values
+  /// with an optional numeric severity for ordering.
+  Custom(String, Option<i32>),
 }
 
 impl Level {
@@ -39,14 +40,14 @@ impl Level {
   pub fn name(&self) -> String {
     match self {
       Level::Emergency => "emergency".into(),
-      Level::Alert => "alert".into(),
-      Level::Critical => "critical".into(),
-      Level::Error => "error".into(),
-      Level::Warning => "warning".into(),
-      Level::Notice => "notice".into(),
-      Level::Info => "info".into(),
-      Level::Debug => "debug".into(),
-      Level::Custom(s)  => s.to_lowercase(),
+      Level::Alert     => "alert".into(),
+      Level::Critical  => "critical".into(),
+      Level::Error     => "error".into(),
+      Level::Warning   => "warning".into(),
+      Level::Notice    => "notice".into(),
+      Level::Info      => "info".into(),
+      Level::Debug     => "debug".into(),
+      Level::Custom(s, _) => s.to_lowercase(),
     }
   }
 
@@ -86,7 +87,8 @@ impl Level {
   /// - `"alert"` - `Alert`
   /// - `"emergency"` - `Emergency`
   ///
-  /// Any other string will be mapped to a `Custom` level.
+  /// Any other string will be mapped to a `Custom` level
+  /// with no predefined severity (`None`).
   pub fn from_name(name: &str) -> Self {
     match name.to_lowercase().as_str() {
       "debug" => Level::Debug,
@@ -97,7 +99,7 @@ impl Level {
       "critical" => Level::Critical,
       "alert" => Level::Alert,
       "emergency" => Level::Emergency,
-      other => Level::Custom(other.to_string()),
+      other => Level::Custom(other.to_string(), None),
     }
   }
 
@@ -112,7 +114,8 @@ impl Level {
   /// - `6` - **Info** (Informational messages, general system events)
   /// - `7` - **Debug** (Debug-level messages, detailed diagnostic information)
   ///
-  /// Any other numeric value will be mapped to a `Custom` level.
+  /// Any other numeric value will be mapped to a `Custom` level
+  /// with the numeric severity preserved.
   pub fn from_value(value: i32) -> Self {
     match value {
       0 => Level::Emergency,
@@ -123,7 +126,7 @@ impl Level {
       5 => Level::Notice,
       6 => Level::Info,
       7 => Level::Debug,
-      _ => Level::Custom(value.to_string()),
+      other => Level::Custom(other.to_string(), Some(other)),
     }
   }
 
@@ -138,7 +141,8 @@ impl Level {
   /// - `Info` - **6** Informational messages, general system events.
   /// - `Debug` - **7** Debug-level messages, detailed diagnostic information.
   ///
-  /// Custom levels return `-1` because they do not have a defined numeric mapping.
+  /// Custom levels return their defined severity if provided,
+  /// otherwise `-1` because they do not have a defined numeric mapping.
   pub fn to_value(&self) -> i32 {
     match self {
       Level::Debug => 7,
@@ -149,7 +153,8 @@ impl Level {
       Level::Critical => 2,
       Level::Alert => 1,
       Level::Emergency => 0,
-      Level::Custom(_) => -1
+      Level::Custom(_, Some(v)) => *v,
+      Level::Custom(_, None) => -1,
     }
   }
 }
