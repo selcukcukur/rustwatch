@@ -1,8 +1,8 @@
 use rustlog::logger::Logger;
 use rustlog::level::Level;
-use rustlog::formatter::{LineFormatter, JsonFormatter};
-use rustlog::processor::ContextProcessor;
-use rustlog::handler::{ConsoleHandler, FileHandler};
+use rustlog::formatter::{line::LineFormatter, json::JsonFormatter};
+use rustlog::processor::context::ContextProcessor;
+use rustlog::handler::{console::ConsoleHandler, file::FileHandler};
 
 fn main() {
   // Create a new logger instance

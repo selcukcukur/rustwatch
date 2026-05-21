@@ -1,8 +1,5 @@
 use crate::record::Record;
-
-pub trait Processor {
-  fn process(&self, record: &mut Record);
-}
+use super::Processor;
 
 pub struct ContextProcessor {
   pub key: String,
