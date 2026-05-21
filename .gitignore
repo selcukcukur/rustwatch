@@ -1,0 +1,50 @@
+# Build artifacts
+target/
+
+# Test artifacts
+coverage/
+.nyc_output/
+
+# Editor artifacts
+.idea/*
+.vscode/*
+!.vscode/extensions.json
+
+# Runtime environment (directories)
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
+# Runtime environment (files)
+Cargo.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.pdb
+*.exe
+*.dll
+*.dylib
+*.so
+.env
+.env.*
+!.env.example
+
+# Working environment
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.tmp
+*.bak
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
