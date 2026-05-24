@@ -144,8 +144,8 @@ impl Level {
   ///
   /// Any other numeric value will be mapped to a `Custom` level
   /// with the numeric severity preserved.
-  pub fn from_value(value: i32) -> Self {
-    match value {
+  pub fn from_severity(severity: i32) -> Self {
+    match severity {
       0 => Level::Emergency,
       1 => Level::Alert,
       2 => Level::Critical,
