@@ -138,6 +138,19 @@ impl Logger {
         self.write(Level::Debug, message, context);
     }
 
+    /// Log a message with an explicit severity level.
+    ///
+    /// **Parameters**
+    /// - `level` - Severity level of the log (e.g. `Level::Debug`, `Level::Info`).
+    /// - `message` - Log message string.
+    /// - `context` - Optional JSON context (default: `{}`).
+    ///
+    /// **Returns**
+    /// - `bool` → Whether the record was handled by any handler.
+    pub fn log(&mut self, level: Level, message: &str, context: Option<Value>) -> bool {
+        self.write(level, message, context)
+    }
+
     /// Log a message with the given level and optional metadata.
     ///
     /// **Parameters**
