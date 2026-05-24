@@ -21,7 +21,7 @@ pub enum Level {
   Debug,
   /// User-defined custom log level, allows arbitrary string values
   /// with an optional numeric severity for ordering.
-  Custom(String, Option<i32>),
+  Custom(String, Option<i8>),
 }
 
 impl Level {
@@ -72,7 +72,7 @@ impl Level {
   ///
   /// Custom levels return their defined severity if provided,
   /// otherwise `-1` because they do not have a defined numeric mapping.
-  pub fn severity(&self) -> i32 {
+  pub fn severity(&self) -> i8 {
     match self {
       Level::Debug => 7,
       Level::Info => 6,
@@ -144,7 +144,7 @@ impl Level {
   ///
   /// Any other numeric value will be mapped to a `Custom` level
   /// with the numeric severity preserved.
-  pub fn from_severity(severity: i32) -> Self {
+  pub fn from_severity(severity: i8) -> Self {
     match severity {
       0 => Level::Emergency,
       1 => Level::Alert,
