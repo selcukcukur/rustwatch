@@ -1,10 +1,10 @@
 // Internal module declarations for core logging components
-mod level;
-mod record;
-mod logger;
 mod formatter;
 mod handler;
+mod level;
+mod logger;
 mod processor;
+mod record;
 
 // Expose level enum at crate root
 pub use level::Level;
@@ -22,15 +22,15 @@ pub use processor::Processor;
 
 /// Public module exposing all formatter implementations
 pub mod formatters {
-  pub use super::formatter::*;
+    pub use super::formatter::*;
 }
 
 /// Public module exposing all handler implementations
 pub mod handlers {
-  pub use super::handler::*;
+    pub use super::handler::*;
 }
 
 /// Public module exposing all processor implementations
 pub mod processors {
-  pub use super::processor::*;
+    pub use super::processor::*;
 }

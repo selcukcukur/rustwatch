@@ -2,11 +2,11 @@ use crate::Record;
 
 /// Expose Processor trait at crate root
 pub trait Processor {
-  fn process(&self, record: &mut Record);
+    fn process(&self, record: &mut Record);
 
-  fn severity(&self) -> usize {
-    0
-  }
+    fn severity(&self) -> usize {
+        0
+    }
 }
 
 // Internal modules for processor implementations
