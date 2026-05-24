@@ -20,17 +20,17 @@ pub use handler::Handler;
 // Expose processor trait at crate root
 pub use processor::Processor;
 
-// Re-export all formatter implementations
+/// Public module exposing all formatter implementations
 pub mod formatters {
   pub use super::formatter::*;
 }
 
-// Re-export all handler implementations
+/// Public module exposing all handler implementations
 pub mod handlers {
   pub use super::handler::*;
 }
 
-// Re-export all processor implementations
+/// Public module exposing all processor implementations
 pub mod processors {
   pub use super::processor::*;
 }

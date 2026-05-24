@@ -4,7 +4,7 @@ use chrono_tz::Tz;
 use serde_json::{Value};
 
 #[derive(Debug, Clone)]
-pub struct LogRecord {
+pub struct Record {
   pub level: Level,
   pub message: String,
   pub timestamp: DateTime<Tz>,
@@ -13,7 +13,7 @@ pub struct LogRecord {
   pub formatted: Option<String>,
 }
 
-impl LogRecord {
+impl Record {
   /// Create a new log record with all fields configurable.
   ///
   /// **Parameters**

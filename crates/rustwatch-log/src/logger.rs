@@ -1,5 +1,5 @@
 use crate::Level;
-use crate::LogRecord;
+use crate::Record;
 use crate::processor::Processor;
 use crate::handler::Handler;
 use serde_json::Value;
@@ -171,7 +171,7 @@ impl Logger {
     let tz: Tz = self.timezone.parse().unwrap_or(chrono_tz::UTC);
     let timestamp: DateTime<Tz> = Utc::now().with_timezone(&tz);
 
-    let mut record = LogRecord::new(
+    let mut record = Record::new(
       level,
       message,
       &self.name,
