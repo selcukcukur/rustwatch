@@ -16,7 +16,7 @@
     # Rust edition (modern syntax and features)
     edition = "2024"
     # Crates.io category (used for classification and discoverability)
-    categories = ["development-tools::logging", "development-tools::debugging", "development-tools::profiling"]
+    categories = ["development-tools", "development-tools::debugging", "development-tools::profiling"]
     # Documentation URL (published API reference on docs.rs)
     documentation = "https://docs.rs/rustwatch"
     # Repository URL (source code and issue tracker)
