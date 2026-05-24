@@ -90,17 +90,35 @@ impl Level {
   /// Returns true if this level has a lower severity than the other.
   ///
   /// **Parameters**
-  /// - `other` - The `Level` to compare against.
+  /// - `other`: The `Level` to compare against.
+  ///
+  /// **Returns**
+  /// A boolean indicating whether this level’s numeric severity is lower than `other`.
   pub fn is_lower_than(&self, other: &Level) -> bool {
-    self.severity() < other.severity()
+    let s1 = self.severity();
+    let s2 = other.severity();
+
+    if s1 == -1 { return false; }
+    if s2 == -1 { return true; }
+
+    s1 < s2
   }
 
   /// Returns true if this level has a higher severity than the other.
   ///
   /// **Parameters**
-  /// - `other` - The `Level` to compare against.
+  /// - `other`: The `Level` to compare against.
+  ///
+  /// **Returns**
+  /// A boolean indicating whether this level’s numeric severity is higher than `other`.
   pub fn is_higher_than(&self, other: &Level) -> bool {
-    self.severity() > other.severity()
+    let s1 = self.severity();
+    let s2 = other.severity();
+
+    if s1 == -1 { return false; }
+    if s2 == -1 { return true; }
+
+    s1 > s2
   }
 
   /// Constructs a `Level` from a string name (case-insensitive).
