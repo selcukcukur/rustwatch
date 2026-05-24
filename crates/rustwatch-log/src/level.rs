@@ -82,14 +82,6 @@ impl Level {
         }
     }
 
-    /// Returns true if this level is part of the given list of levels.
-    ///
-    /// **Parameters**
-    /// - `levels` - A slice of `Level` values to check against.
-    pub fn filter(&self, levels: &[Level]) -> bool {
-        levels.contains(self)
-    }
-
     /// Returns true if this level is more severe than `other`.
     ///
     /// **Parameters**
