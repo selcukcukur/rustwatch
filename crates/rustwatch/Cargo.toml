@@ -38,6 +38,9 @@
     # Serde JSON is used for formatting log records into JSON strings
     serde_json = "1.0.149"
 
+    # Rustwatch - Logger
+    rustwatch-log = { path = "../rustwatch-log" }
+
 [lib]
     name = "rustwatch"
     path = "src/lib.rs"

@@ -1,4 +1,4 @@
-use crate::record::Record;
+use crate::Record;
 use super::Processor;
 use serde_json::json;
 

@@ -1,4 +1,4 @@
-use crate::record::Record;
+use crate::Record;
 use crate::formatter::Formatter;
 use super::Handler;
 

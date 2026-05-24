@@ -1,4 +1,4 @@
-use crate::record::Record;
+use crate::Record;
 
 pub trait Handler {
   fn log(&mut self, record: &Record) -> bool;

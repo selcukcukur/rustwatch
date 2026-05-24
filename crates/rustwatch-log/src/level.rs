@@ -51,14 +51,6 @@ impl Level {
     }
   }
 
-  /// Returns true if this level is part of the given list of levels.
-  ///
-  /// **Parameters**
-  /// - `levels` - A slice of `Level` values to check against.
-  pub fn filter(&self, levels: &[Level]) -> bool {
-    levels.contains(self)
-  }
-
   /// Returns the numeric severity value for this log level.
   ///
   /// - `Emergency` - **0** System is unusable, requires immediate attention.
@@ -85,6 +77,14 @@ impl Level {
       Level::Custom(_, Some(v)) => *v,
       Level::Custom(_, None) => -1,
     }
+  }
+
+  /// Returns true if this level is part of the given list of levels.
+  ///
+  /// **Parameters**
+  /// - `levels` - A slice of `Level` values to check against.
+  pub fn filter(&self, levels: &[Level]) -> bool {
+    levels.contains(self)
   }
 
   /// Returns true if this level has a lower severity than the other.

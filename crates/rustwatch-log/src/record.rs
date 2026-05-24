@@ -1,7 +1,7 @@
-use crate::level::Level;
-use chrono::{DateTime, Local};
+use crate::Level;
+use chrono::{DateTime};
 use chrono_tz::Tz;
-use serde_json::{Value, json};
+use serde_json::{Value};
 
 #[derive(Debug, Clone)]
 pub struct Record {
@@ -30,12 +30,12 @@ impl Record {
     message: &str,
     channel: &str,
     context: Option<Value>,
-    timestamp: DateTime<Tz>, // dışarıdan hazır verilecek
+    timestamp: DateTime<Tz>,
   ) -> Self {
     Self {
       level,
       message: message.to_string(),
-      timestamp, // direkt kullanılıyor
+      timestamp,
       context: context.unwrap_or_else(|| Value::Object(serde_json::Map::new())),
       channel: channel.to_string(),
       formatted: None,
@@ -59,7 +59,7 @@ impl Record {
   }
 
   /// Get the severity value derived from the log level.
-  pub fn severity(&self) -> i32 {
+  pub fn severity(&self) -> i8 {
     self.level.severity()
   }
 

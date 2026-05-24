@@ -1,4 +1,4 @@
-use crate::record::Record;
+use crate::Record;
 
 pub trait Processor {
   fn process(&self, record: &mut Record);

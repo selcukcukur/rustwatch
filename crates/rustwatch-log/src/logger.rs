@@ -1,5 +1,5 @@
-use crate::level::Level;
-use crate::record::Record;
+use crate::Level;
+use crate::Record;
 use crate::processor::Processor;
 use crate::handler::Handler;
 use serde_json::Value;

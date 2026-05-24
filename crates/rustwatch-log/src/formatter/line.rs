@@ -1,4 +1,4 @@
-use crate::record::Record;
+use crate::Record;
 use super::Formatter;
 
 /// A formatter that outputs log records in a simple line format.
