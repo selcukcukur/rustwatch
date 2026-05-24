@@ -1,43 +1,45 @@
+# Package configurations
 [package]
     # The name of the crate as it will appear on crates.io
     name = "rustwatch-log"
-
-    # A short description of what the crate does
+    # A concise description of the crate’s purpose (shown on crates.io and docs.rs)
     description = "Stream your logs to files, sockets, databases, inboxes, and the cloud."
-
-    # Keywords to help with discoverability on crates.io
-    keywords = ["logging", "logger", "log", "rust", "lightweight"]
-
-    # Author information
+    # Keywords to improve discoverability on crates.io
+    keywords = ["logging", "logger", "log", "rust", "rustwatch"]
+    # Author information (name and email)
     authors = ["Selçuk Çukur <hello@selcukcukur.me>"]
-
-    # Package license information
+    # License identifier (SPDX format, e.g. MIT, Apache-2.0)
     license = "MIT"
-
-    # Current version of the crate
+    # Current crate version (Semantic Versioning compliant)
     version = "0.1.0"
-
-    #
-    categories = ["development-tools::debugging"]
 
     # Rust edition (modern syntax and features)
     edition = "2024"
-
-    repository = "https://github.com/seninrepo/rustlog"
-    documentation = "https://docs.rs/rustlog"
+    # Crates.io category (used for classification and discoverability)
+    categories = ["development-tools::logging", "development-tools::debugging", "development-tools::profiling"]
+    # Documentation URL (published API reference on docs.rs)
+    documentation = "https://docs.rs/rustwatch"
+    # Repository URL (source code and issue tracker)
+    repository = "https://github.com/selcukcukur/rustwatch"
+    # Path to the readme file (displayed on crates.io)
     readme = "readme.md"
 
+# Dependency configurations
 [dependencies]
-    # Chrono is used for handling timestamps in log records
-    chrono = "0.4.44"
-    chrono-tz = "0.10.4"
+    # Chrono provides date and time utilities (timestamps in log records)
+    chrono.workspace = true
+    # Chrono-tz adds timezone support for Chrono (used for timezone-aware logging)
+    chrono-tz.workspace = true
 
-    # Serde provides serialization and deserialization support
-    serde = { version = "1.0", features = ["derive"] }
+    # Serde is the core serialization/deserialization framework
+    serde.workspace = true
+    # Serde JSON is the JSON backend for Serde (used for structured log output)
+    serde_json.workspace = true
 
-    # Serde JSON is used for formatting log records into JSON strings
-    serde_json = "1.0.149"
-
+# Library configuration
 [lib]
+    # The library name (as exposed to other crates)
     name = "rustwatch_log"
+
+    # Path to the library entry point (main source file)
     path = "src/lib.rs"

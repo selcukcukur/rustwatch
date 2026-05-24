@@ -1,46 +1,36 @@
+# Package configurations
 [package]
     # The name of the crate as it will appear on crates.io
     name = "rustwatch"
-
     # A short description of what the crate does
-    description = "Stream your logs to files, sockets, databases, inboxes, and the cloud."
-
+    description = "First‑class logging and monitoring for Rust applications. Deep insights and structured logs, no matter where you deploy."
     # Keywords to help with discoverability on crates.io
-    keywords = ["logging", "logger", "log", "rust", "lightweight"]
-
+    keywords = ["tracing", "logging", "telemetry", "watch", "rust"]
     # Author information
     authors = ["Selçuk Çukur <hello@selcukcukur.me>"]
-
     # Package license information
     license = "MIT"
-
     # Current version of the crate
     version = "0.1.0"
 
-    #
-    categories = ["development-tools::debugging"]
-
     # Rust edition (modern syntax and features)
     edition = "2024"
-
-    repository = "https://github.com/seninrepo/rustlog"
-    documentation = "https://docs.rs/rustlog"
+    # Crates.io category (used for classification and discoverability)
+    categories = ["development-tools::logging", "development-tools::debugging", "development-tools::profiling"]
+    # Documentation URL (published API reference on docs.rs)
+    documentation = "https://docs.rs/rustwatch"
+    # Repository URL (source code and issue tracker)
+    repository = "https://github.com/selcukcukur/rustwatch"
+    # Path to the readme file (displayed on crates.io)
     readme = "readme.md"
 
+# Dependency configurations
 [dependencies]
-    # Chrono is used for handling timestamps in log records
-    chrono = "0.4.44"
-    chrono-tz = "0.10.4"
 
-    # Serde provides serialization and deserialization support
-    serde = { version = "1.0", features = ["derive"] }
-
-    # Serde JSON is used for formatting log records into JSON strings
-    serde_json = "1.0.149"
-
-    # Rustwatch - Logger
-    rustwatch-log = { path = "../rustwatch-log" }
-
+# Library configuration
 [lib]
+    # The library name (as exposed to other crates)
     name = "rustwatch"
+
+    # Path to the library entry point (main source file)
     path = "src/lib.rs"

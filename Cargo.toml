@@ -1,8 +1,22 @@
+# Workspace configurations
 [workspace]
-members = [
-    "crates/rustwatch",
-    "crates/rustwatch-cli",
-    "crates/rustwatch-log"
-]
+    # Lists the member crates (subprojects) that are part of this workspace
+    members = [
+        "crates/rustwatch",         # Rustwatch -
+        "crates/rustwatch-cli",     # Rustwatch CLI - Console application
+        "crates/rustwatch-log"      # Rustwatch Log - Logging library
+    ]
+    # Resolver version controls how cargo resolves dependency versions across the workspace
+    resolver = "3"
 
-resolver = "3"
+# Workspace dependency configurations
+[workspace.dependencies]
+    # Chrono provides date and time utilities (timestamps in log records)
+    chrono = "0"
+    # Chrono-tz adds timezone support for Chrono (used for timezone-aware logging)
+    chrono-tz = "0"
+
+    # Serde is the core serialization/deserialization framework
+    serde = { version = "1", features = ["derive"] }
+    # Serde JSON is the JSON backend for Serde (used for structured log output)
+    serde_json = "1"
