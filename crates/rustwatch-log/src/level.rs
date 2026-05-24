@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use serde::Serialize;
 
 /// Represents the log levels.
@@ -182,5 +183,11 @@ impl Level {
             7 => Level::Debug,
             other => Level::Custom(other.to_string(), Some(other)),
         }
+    }
+}
+
+impl Display for Level {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.name().as_ref())
     }
 }
