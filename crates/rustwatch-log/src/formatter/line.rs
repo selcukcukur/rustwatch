@@ -1,4 +1,4 @@
-use crate::LogRecord;
+use crate::Record;
 use super::Formatter;
 
 /// A formatter that outputs log records in a simple line format.
@@ -23,7 +23,7 @@ use super::Formatter;
 pub struct LineFormatter;
 
 impl Formatter for LineFormatter {
-  fn format(&self, record: &LogRecord) -> String {
+  fn format(&self, record: &Record) -> String {
     let ctx_str = if record.context.is_null() {
       "".to_string()
     } else {

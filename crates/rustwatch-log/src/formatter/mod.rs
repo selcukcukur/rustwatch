@@ -1,8 +1,14 @@
-use crate::LogRecord;
+use crate::Record;
 
+/// Trait for all formatter implementations
 pub trait Formatter {
-  fn format(&self, record: &LogRecord) -> String;
+  fn format(&self, record: &Record) -> String;
 }
 
-pub mod line;
-pub mod json;
+// Internal modules for formatter implementations
+mod line;
+mod json;
+
+// Re-export all formatter implementations for direct use via `formatters::`
+pub use line::*;
+pub use json::*;

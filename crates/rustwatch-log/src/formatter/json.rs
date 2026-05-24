@@ -1,4 +1,4 @@
-use crate::LogRecord;
+use crate::Record;
 use super::Formatter;
 use serde_json::json;
 
@@ -25,7 +25,7 @@ use serde_json::json;
 pub struct JsonFormatter;
 
 impl Formatter for JsonFormatter {
-  fn format(&self, record: &LogRecord) -> String {
+  fn format(&self, record: &Record) -> String {
     json!({
             "timestamp": record.timestamp.to_rfc3339(),
             "level": record.level.name(),
