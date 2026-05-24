@@ -90,46 +90,26 @@ impl Level {
         levels.contains(self)
     }
 
-    /// Returns true if this level has a lower severity than the other.
+    /// Returns true if this level is more severe than `other`.
     ///
     /// **Parameters**
     /// - `other`: The `Level` to compare against.
     ///
     /// **Returns**
-    /// A boolean indicating whether this level’s numeric severity is lower than `other`.
-    pub fn is_lower_than(&self, other: &Level) -> bool {
-        let s1 = self.severity();
-        let s2 = other.severity();
-
-        if s1 == -1 {
-            return false;
-        }
-        if s2 == -1 {
-            return true;
-        }
-
-        s1 < s2
+    /// - `true` if this level is more severe than `other`
+    pub fn above(&self, other: &Self) -> bool {
+        self.severity() < other.severity()
     }
 
-    /// Returns true if this level has a higher severity than the other.
+    /// Returns true if this level is less severe than `other`.
     ///
     /// **Parameters**
     /// - `other`: The `Level` to compare against.
     ///
     /// **Returns**
-    /// A boolean indicating whether this level’s numeric severity is higher than `other`.
-    pub fn is_higher_than(&self, other: &Level) -> bool {
-        let s1 = self.severity();
-        let s2 = other.severity();
-
-        if s1 == -1 {
-            return false;
-        }
-        if s2 == -1 {
-            return true;
-        }
-
-        s1 > s2
+    /// - `true` if this level is less severe than `other`
+    pub fn below(&self, other: &Self) -> bool {
+        self.severity() > other.severity()
     }
 
     /// Constructs a `Level` from a string name (case-insensitive).
