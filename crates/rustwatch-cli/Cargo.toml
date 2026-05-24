@@ -40,4 +40,4 @@
 
 [[bin]]
     name = "rustwatch"
-    path = "source/main.rs"
+    path = "src/main.rs"

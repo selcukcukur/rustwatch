@@ -43,43 +43,99 @@ impl Logger {
   }
 
   /// Log an emergency message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn emergency(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Emergency, message, context);
+    self.write(Level::Emergency, message, context);
   }
 
   /// Log an alert message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn alert(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Alert, message, context);
+    self.write(Level::Alert, message, context);
   }
 
-  /// Log a critical message to the logs
+  /// Log a critical message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn critical(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Critical, message, context);
+    self.write(Level::Critical, message, context);
   }
 
-  /// Log an error message to the logs
+  /// Log an error message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn error(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Error, message, context);
+    self.write(Level::Error, message, context);
   }
 
-  /// Log a warning message to the logs
+  /// Log a warning message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn warning(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Warning, message, context);
+    self.write(Level::Warning, message, context);
   }
 
-  /// Log a notice to the logs
+  /// Log a notice to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn notice(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Notice, message, context);
+    self.write(Level::Notice, message, context);
   }
 
-  /// Log an informational message to the logs
+  /// Log an informational message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn info(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Info, message, context);
+    self.write(Level::Info, message, context);
   }
 
-  /// Log a debug message to the logs
+  /// Log a debug message to the logs.
+  ///
+  /// **Parameters**
+  /// - `message` - Log message string
+  /// - `context` - Optional JSON context (default: `{}`)
+  ///
+  /// **Returns**
+  /// - `bool` → Whether the record was handled by any handler
   pub fn debug(&mut self, message: &str, context: Option<Value>) {
-    self.log(Level::Debug, message, context);
+    self.write(Level::Debug, message, context);
   }
 
   /// Log a message with the given level and optional metadata.
@@ -91,7 +147,7 @@ impl Logger {
   ///
   /// **Returns**
   /// - `bool` → Whether the record was handled by any handler
-  pub fn log(&mut self, level: Level, message: &str, context: Option<Value>) -> bool {
+  pub fn write(&mut self, level: Level, message: &str, context: Option<Value>) -> bool {
     let log_depth = if self.cycles {
       self.fiber_depth += 1;
       self.fiber_depth

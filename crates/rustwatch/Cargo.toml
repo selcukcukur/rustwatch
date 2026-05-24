@@ -1,6 +1,6 @@
 [package]
     # The name of the crate as it will appear on crates.io
-    name = "rustwatch-log"
+    name = "rustwatch"
 
     # A short description of what the crate does
     description = "Stream your logs to files, sockets, databases, inboxes, and the cloud."
@@ -39,5 +39,5 @@
     serde_json = "1.0.149"
 
 [lib]
-    name = "rustwatch-log"
-    path = "source/lib.rs"
+    name = "rustwatch"
+    path = "src/lib.rs"

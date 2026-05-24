@@ -39,5 +39,5 @@
     serde_json = "1.0.149"
 
 [lib]
-    name = "rustwatch-log"
-    path = "source/lib.rs"
+    name = "rustwatch_log"
+    path = "src/lib.rs"
