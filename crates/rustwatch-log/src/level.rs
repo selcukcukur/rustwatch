@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 use serde::Serialize;
 
 /// Represents the log levels.
@@ -191,3 +192,12 @@ impl Display for Level {
         f.write_str(self.name().as_ref())
     }
 }
+
+impl FromStr for Level {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from_name(s))
+    }
+}
+
