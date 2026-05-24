@@ -1,4 +1,4 @@
-use crate::Record;
+use crate::LogRecord;
 use crate::formatter::Formatter;
 use super::Handler;
 use std::fs::OpenOptions;
@@ -21,7 +21,7 @@ impl Handler for FileHandler {
   /// **Returns**
   /// - `true` → If the record was successfully written
   /// - `false` → If writing failed
-  fn log(&mut self, record: &Record) -> bool {
+  fn log(&mut self, record: &LogRecord) -> bool {
     match OpenOptions::new()
       .create(true)
       .append(true)

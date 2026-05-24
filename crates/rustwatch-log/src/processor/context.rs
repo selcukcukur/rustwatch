@@ -1,4 +1,4 @@
-use crate::Record;
+use crate::LogRecord;
 use super::Processor;
 use serde_json::json;
 
@@ -30,7 +30,7 @@ pub struct ContextProcessor {
 }
 
 impl Processor for ContextProcessor {
-  fn process(&self, record: &mut Record) {
+  fn process(&self, record: &mut LogRecord) {
     let mut ctx = if record.context.is_null() {
       json!({})
     } else {

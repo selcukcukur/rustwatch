@@ -1,4 +1,4 @@
-use crate::Record;
+use crate::LogRecord;
 use crate::formatter::Formatter;
 use super::Handler;
 
@@ -17,7 +17,7 @@ impl Handler for ConsoleHandler {
   ///
   /// **Returns**
   /// - `true` → Always returns true since console output never fails
-  fn log(&mut self, record: &Record) -> bool {
+  fn log(&mut self, record: &LogRecord) -> bool {
     println!("{}", self.formatter.format(record));
     true
   }

@@ -1,7 +1,7 @@
-use crate::Record;
+use crate::LogRecord;
 
 pub trait Handler {
-  fn log(&mut self, record: &Record) -> bool;
+  fn log(&mut self, record: &LogRecord) -> bool;
 
   fn severity(&self) -> usize {
     0
