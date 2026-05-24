@@ -1,43 +1,8 @@
-[package]
-    # The name of the crate as it will appear on crates.io
-    name = "rustlog"
+[workspace]
+members = [
+    "crates/rustwatch",
+    "crates/rustwatch-cli",
+    "crates/rustwatch-log"
+]
 
-    # A short description of what the crate does
-    description = "A modular logging library for Rust inspired by Monolog (PHP)"
-
-    # Keywords to help with discoverability on crates.io
-    keywords = ["logging", "logger", "log", "rust", "lightweight"]
-
-    # Author information
-    authors = ["Selçuk Çukur <hello@selcukcukur.me>"]
-
-    # Package license information
-    license = "MIT"
-
-    # Current version of the crate
-    version = "0.1.0"
-
-    #
-    categories = ["development-tools::debugging"]
-
-    # Rust edition (modern syntax and features)
-    edition = "2024"
-
-    repository = "https://github.com/seninrepo/rustlog"
-    documentation = "https://docs.rs/rustlog"
-    readme = "readme.md"
-
-[dependencies]
-    # Chrono is used for handling timestamps in log records
-    chrono = "0.4.44"
-
-    # Serde provides serialization and deserialization support
-    serde = { version = "1.0", features = ["derive"] }
-
-    # Serde JSON is used for formatting log records into JSON strings
-    serde_json = "1.0.149"
-chrono-tz = "0.10.4"
-
-[lib]
-    name = "rustlog"
-    path = "source/lib.rs"
+resolver = "3"

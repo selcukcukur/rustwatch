@@ -59,7 +59,6 @@ impl Level {
     levels.contains(self)
   }
 
-
   /// Returns the numeric severity value for this log level.
   ///
   /// - `Emergency` - **0** System is unusable, requires immediate attention.

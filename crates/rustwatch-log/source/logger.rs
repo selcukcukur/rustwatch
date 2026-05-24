@@ -3,7 +3,7 @@ use crate::record::Record;
 use crate::processor::Processor;
 use crate::handler::Handler;
 use serde_json::Value;
-use chrono::{Utc, DateTime, Local};
+use chrono::{Utc, DateTime};
 use chrono_tz::Tz;
 
 /// Central logging component that manages handlers and processors.
@@ -22,6 +22,12 @@ pub struct Logger {
   processors: Vec<Box<dyn Processor>>,
 }
 
+/// Unified component type for Logger with optional severity.
+pub enum LoggerComponent {
+  Handler(Box<dyn Handler>),
+  Processor(Box<dyn Processor>),
+}
+
 impl Logger {
   /// Create a new logger with empty handler and processor lists.
   pub fn new(name: impl Into<String>, timezone: impl Into<String>) -> Self {
@@ -34,16 +40,6 @@ impl Logger {
       handlers: vec![],
       processors: vec![],
     }
-  }
-
-  /// Add a handler to the logger (e.g. console, file, external service).
-  pub fn add_handler(&mut self, handler: Box<dyn Handler>) {
-    self.handlers.push(handler);
-  }
-
-  /// Add a processor to the logger (e.g. context enrichment).
-  pub fn add_processor(&mut self, processor: Box<dyn Processor>) {
-    self.processors.push(processor);
   }
 
   /// Log an emergency message to the logs.
@@ -152,5 +148,52 @@ impl Logger {
     }
 
     handled
+  }
+
+  pub fn push(&mut self, component: LoggerComponent) {
+    match component {
+      LoggerComponent::Handler(handler) => {
+        self.handlers.push(handler);
+        self.handlers.sort_by(|b, a| b.severity().cmp(&a.severity()));
+      }
+      LoggerComponent::Processor(processor) => {
+        self.processors.push(processor);
+        self.processors.sort_by(|b, a| b.severity().cmp(&a.severity()));
+      }
+    }
+  }
+
+  pub fn pop(&mut self, is_handler: bool) -> Option<LoggerComponent> {
+    if is_handler {
+      self.handlers.pop().map(LoggerComponent::Handler)
+    } else {
+      self.processors.pop().map(LoggerComponent::Processor)
+    }
+  }
+
+  /// Flush the entire logger state (handlers, processors, depth)
+  pub fn flush(&mut self) {
+    self.handlers.clear();
+    self.processors.clear();
+    self.depth = 0;
+    self.fiber_depth = 0;
+    self.cycles = false;
+  }
+
+  /// Flush logger handlers
+  pub fn flush_handlers(&mut self) {
+    self.handlers.clear();
+  }
+
+  /// Flush logger processors
+  pub fn flush_processors(&mut self) {
+    self.processors.clear();
+  }
+
+  /// Flush logger depth state
+  pub fn flush_depth(&mut self) {
+    self.depth = 0;
+    self.fiber_depth = 0;
+    self.cycles = false;
   }
 }
