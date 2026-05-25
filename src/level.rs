@@ -164,7 +164,7 @@ impl Level {
 ///
 /// This implementation is used when logging, displaying, or serializing
 /// log levels in a user-facing format.
-impl std::fmt::Display for Level {
+impl Display for Level {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.name().as_ref())
     }
@@ -174,7 +174,7 @@ impl std::fmt::Display for Level {
 ///
 /// This allows `Level` to be created from config files, environment
 /// variables, or user input such as "info", "debug", "error".
-impl std::str::FromStr for Level {
+impl FromStr for Level {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
