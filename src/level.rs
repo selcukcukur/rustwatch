@@ -160,13 +160,21 @@ impl Level {
     }
 }
 
-impl Display for Level {
+/// Enables converting `Level` into a human-readable string representation.
+///
+/// This implementation is used when logging, displaying, or serializing
+/// log levels in a user-facing format.
+impl std::fmt::Display for Level {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.name().as_ref())
     }
 }
 
-impl FromStr for Level {
+/// Parses a `Level` from its string representation.
+///
+/// This allows `Level` to be created from config files, environment
+/// variables, or user input such as "info", "debug", "error".
+impl std::str::FromStr for Level {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -174,12 +182,20 @@ impl FromStr for Level {
     }
 }
 
+/// Defines partial ordering behavior for `Level`.
+///
+/// Required for comparisons like `level > other_level` where ordering
+/// is not strictly guaranteed for all possible values.
 impl PartialOrd for Level {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
+/// Defines total ordering for `Level` based on severity.
+///
+/// Higher severity levels are considered "less" in ordering due to
+/// `.reverse()`, so that more critical levels come first when sorted.
 impl Ord for Level {
     fn cmp(&self, other: &Self) -> Ordering {
         self.severity().cmp(&other.severity()).reverse()
