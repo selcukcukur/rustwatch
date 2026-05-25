@@ -1,7 +1,22 @@
 use crate::Record;
 
-/// Trait for all formatter implementations
-pub trait Formatter {
+/// Core trait for formatting log records.
+///
+/// A `Formatter` is responsible for converting a structured [`Record`]
+/// into its final string representation suitable for output sinks such as
+/// stdout, files, or network transports.
+///
+/// Implementations may produce different output formats such as
+/// plain text, JSON, or custom structured encodings.
+pub trait Formatter: Send + Sync {
+    /// Formats a log `Record` into a string representation.
+    ///
+    /// **Parameters**
+    /// - `record` - The log record containing message, level, timestamp,
+    ///   and additional contextual metadata.
+    ///
+    /// **Returns**
+    /// - `String` - The formatted log output as a string.
     fn format(&self, record: &Record) -> String;
 }
 
