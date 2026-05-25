@@ -1,6 +1,6 @@
 use chrono::Utc;
 use chrono_tz::UTC;
-use rustwatch_log::{Level, Record};
+use rustwatch::{Level, Record};
 use serde_json::{Value, json};
 
 fn now() -> chrono::DateTime<chrono_tz::Tz> {
