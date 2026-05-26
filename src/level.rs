@@ -2,8 +2,70 @@ use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use serde::Serialize;
+use crate::error::Error;
 
-/// Represents the log levels.
+/// Log severity levels used to classify and control log output.
+///
+/// **Usage**
+/// ```rust
+/// use rustwatch::Level;
+///
+/// let level = Level::Critical;
+/// let module = "auth_service";
+/// let message = "Database connection failed";
+///
+/// // Early filtering (avoid unnecessary work)
+/// if level.below(&Level::Info) {
+///     return;
+/// }
+///
+/// // Enrichment step (add context before output)
+/// let formatted = format!(
+///     "[{}] [{}] {}",
+///     level,
+///     module,
+///     message
+/// );
+///
+/// // Routing decision (where this log should go)
+/// match level {
+///     Level::Emergency | Level::Alert => {
+///         // route to alerting system
+///     }
+///     Level::Critical => {
+///         // route to incident tracking system
+///     }
+///     Level::Error => {
+///         // route to error logging backend
+///     }
+///     Level::Warning => {
+///         // route to standard monitoring
+///     }
+///     _ => {
+///         // route to debug / local output
+///     }
+/// }
+/// ```
+///
+/// **Scenarios**
+/// - **System failures and crashes**
+///   Use `Emergency`, `Alert`, or `Critical` for conditions that require
+///   immediate attention or indicate system instability.
+/// - **Runtime errors**
+///   Use `Error` when operations fail but the system can continue running.
+/// - **Unexpected but non-critical conditions**
+///   Use `Warning` for recoverable or unexpected situations.
+/// - **General application events**
+///   Use `Notice` for significant lifecycle events such as startup or shutdown.
+/// - **Standard operational logging**
+///   Use `Info` for normal application behavior and state changes.
+/// - **Debugging and diagnostics**
+///   Use `Debug` for detailed internal state useful during development.
+///
+/// **Notes**
+/// - The ordering of levels is fixed and used for filtering and comparison.
+/// - Lower severity values indicate higher importance.
+/// - This type is used across the logging pipeline (logger, processor, handler).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Level {
     /// System is unusable, requires immediate attention
@@ -21,15 +83,35 @@ pub enum Level {
     /// Informational messages, general system events
     Info,
     /// Debug-level messages, detailed diagnostic information
-    Debug,
-    /// User-defined custom log level, allows arbitrary string values
-    /// with an optional numeric severity for ordering.
-    Custom(String, Option<i8>),
+    Debug
 }
 
 impl Level {
-    /// Returns the standardized name of this log level in lowercase.
+    /// Returns true if this level is more severe than **other**.
     ///
+    /// **Arguments**
+    /// - `other` - The `Level` to compare against.
+    ///
+    /// **Returns**
+    /// - `true` if this level is more severe than `other`
+    pub fn above(&self, other: &Self) -> bool {
+        self.severity() < other.severity()
+    }
+
+    /// Returns true if this level is less severe than **other**.
+    ///
+    /// **Arguments**
+    /// - `other`: The `Level` to compare against.
+    ///
+    /// **Returns**
+    /// - `true` if this level is less severe than `other`
+    pub fn below(&self, other: &Self) -> bool {
+        self.severity() > other.severity()
+    }
+
+    /// Returns the standardized **name* of this log level in lowercase.
+    ///
+    /// **Returns**
     /// - `Level::Emergency` - **emergency** (System is unusable, requires immediate attention)
     /// - `Level::Alert` - **alert** (Immediate action must be taken, critical alert)
     /// - `Level::Critical` - **critical** (Critical conditions, serious failures)
@@ -38,35 +120,30 @@ impl Level {
     /// - `Level::Notice` - **notice** (Normal but significant events, noteworthy conditions)
     /// - `Level::Info` - **info** (Informational messages, general system events)
     /// - `Level::Debug` - **debug** (Debug-level messages, detailed diagnostic information)
-    ///
-    /// Custom levels are converted to lowercase strings.
-    pub fn name(&self) -> String {
+    pub fn name(&self) -> &'static str {
         match self {
-            Level::Emergency => "emergency".into(),
-            Level::Alert => "alert".into(),
-            Level::Critical => "critical".into(),
-            Level::Error => "error".into(),
-            Level::Warning => "warning".into(),
-            Level::Notice => "notice".into(),
-            Level::Info => "info".into(),
-            Level::Debug => "debug".into(),
-            Level::Custom(s, _) => s.to_lowercase(),
+            Level::Emergency => "emergency",
+            Level::Alert => "alert",
+            Level::Critical => "critical",
+            Level::Error => "error",
+            Level::Warning => "warning",
+            Level::Notice => "notice",
+            Level::Info => "info",
+            Level::Debug => "debug",
         }
     }
 
-    /// Returns the numeric severity value for this log level.
+    /// Returns the numeric **severity** value associated with this log level.
     ///
-    /// - `Emergency` - **0** System is unusable, requires immediate attention.
-    /// - `Alert` - **1** Immediate action must be taken, critical alert.
-    /// - `Critical` - **2** Critical conditions, serious failures.
-    /// - `Error` - **3** Error conditions, runtime errors.
-    /// - `Warning` - **4** Warning conditions, potential issues.
-    /// - `Notice` - **5** Normal but significant events, noteworthy conditions.
-    /// - `Info` - **6** Informational messages, general system events.
-    /// - `Debug` - **7** Debug-level messages, detailed diagnostic information.
-    ///
-    /// Custom levels return their defined severity if provided,
-    /// otherwise `-1` because they do not have a defined numeric mapping.
+    /// **Returns**
+    /// - `Emergency` - **0** (System is unusable and requires immediate attention)
+    /// - `Alert` - **1** (Immediate action must be taken)
+    /// - `Critical` - **2** (Critical conditions and serious failures)
+    /// - `Error` - **3** (Error conditions and runtime failures)
+    /// - `Warning` - **4** (Potential issues or unexpected situations)
+    /// - `Notice` - **5** (Significant but normal events)
+    /// - `Info` - **6** (Informational messages and general system events)
+    /// - `Debug` - **7** (Detailed diagnostic information)
     pub fn severity(&self) -> i8 {
         match self {
             Level::Debug => 7,
@@ -77,63 +154,43 @@ impl Level {
             Level::Critical => 2,
             Level::Alert => 1,
             Level::Emergency => 0,
-            Level::Custom(_, Some(v)) => *v,
-            Level::Custom(_, None) => -1,
         }
     }
 
-    /// Returns true if this level is more severe than `other`.
+    /// Constructs a log **level** from a lowercase string name.
     ///
-    /// **Parameters**
-    /// - `other`: The `Level` to compare against.
-    ///
-    /// **Returns**
-    /// - `true` if this level is more severe than `other`
-    pub fn above(&self, other: &Self) -> bool {
-        self.severity() < other.severity()
-    }
-
-    /// Returns true if this level is less severe than `other`.
-    ///
-    /// **Parameters**
-    /// - `other`: The `Level` to compare against.
+    /// **Arguments**
+    /// - `name` - Lowercase string representation of the log level.
     ///
     /// **Returns**
-    /// - `true` if this level is less severe than `other`
-    pub fn below(&self, other: &Self) -> bool {
-        self.severity() > other.severity()
-    }
-
-    /// Constructs a `Level` from a string name (case-insensitive).
-    ///
-    /// Each name corresponds to a standard log level:
-    /// - `"debug"` - `Debug`
-    /// - `"info"` - `Info`
-    /// - `"notice"` - `Notice`
-    /// - `"warning"` - `Warning`
-    /// - `"error"` - `Error`
-    /// - `"critical"` - `Critical`
-    /// - `"alert"` - `Alert`
-    /// - `"emergency"` - `Emergency`
-    ///
-    /// Any other string will be mapped to a `Custom` level
-    /// with no predefined severity (`None`).
-    pub fn from_name(name: &str) -> Self {
-        match name.to_lowercase().as_str() {
-            "debug" => Level::Debug,
-            "info" => Level::Info,
-            "notice" => Level::Notice,
-            "warning" => Level::Warning,
-            "error" => Level::Error,
-            "critical" => Level::Critical,
-            "alert" => Level::Alert,
-            "emergency" => Level::Emergency,
-            other => Level::Custom(other.to_string(), None),
+    /// - `emergency` - **Emergency** (System is unusable and requires immediate attention)
+    /// - `alert` - **Alert** (Immediate action must be taken)
+    /// - `critical` - **Critical** (Critical conditions and serious failures)
+    /// - `error` - **Error** (Error conditions and runtime failures)
+    /// - `warning` - **Warning** (Potential issues or unexpected situations)
+    /// - `notice` - **Notice** (Significant but normal events)
+    /// - `info` - **Info** (Informational messages and general system events)
+    /// - `debug` - **Debug** (Detailed diagnostic information)
+    pub fn from_name(name: &str) -> Result<Self, Error> {
+        match name.as_bytes() {
+            b"debug" => Ok(Self::Debug),
+            b"info" => Ok(Self::Info),
+            b"notice" => Ok(Self::Notice),
+            b"warning" => Ok(Self::Warning),
+            b"error" => Ok(Self::Error),
+            b"critical" => Ok(Self::Critical),
+            b"alert" => Ok(Self::Alert),
+            b"emergency" => Ok(Self::Emergency),
+            _ => Err(Error::InvalidLevel(name.to_string())),
         }
     }
 
-    /// Constructs a `Level` from its numeric severity value.
+    /// Constructs a log **level** from its numeric severity value.
     ///
+    /// **Arguments**
+    /// - `severity` - Numeric severity value of the log level.
+    ///
+    /// **Returns**
     /// - `0` - **Emergency** (System is unusable, requires immediate attention)
     /// - `1` - **Alert** (Immediate action must be taken, critical alert)
     /// - `2` - **Critical** (Critical conditions, serious failures)
@@ -142,50 +199,49 @@ impl Level {
     /// - `5` - **Notice** (Normal but significant events, noteworthy conditions)
     /// - `6` - **Info** (Informational messages, general system events)
     /// - `7` - **Debug** (Debug-level messages, detailed diagnostic information)
-    ///
-    /// Any other numeric value will be mapped to a `Custom` level
-    /// with the numeric severity preserved.
-    pub fn from_severity(severity: i8) -> Self {
+    pub fn from_severity(severity: i8) -> Result<Self, Error> {
         match severity {
-            0 => Level::Emergency,
-            1 => Level::Alert,
-            2 => Level::Critical,
-            3 => Level::Error,
-            4 => Level::Warning,
-            5 => Level::Notice,
-            6 => Level::Info,
-            7 => Level::Debug,
-            other => Level::Custom(other.to_string(), Some(other)),
+            0 => Ok(Self::Emergency),
+            1 => Ok(Self::Alert),
+            2 => Ok(Self::Critical),
+            3 => Ok(Self::Error),
+            4 => Ok(Self::Warning),
+            5 => Ok(Self::Notice),
+            6 => Ok(Self::Info),
+            7 => Ok(Self::Debug),
+            _ => Err(Error::InvalidSeverity(severity)),
         }
     }
 }
 
-/// Enables converting `Level` into a human-readable string representation.
+/// Formats the `Level` as a lowercase string.
 ///
-/// This implementation is used when logging, displaying, or serializing
-/// log levels in a user-facing format.
+/// This representation is used for log output, serialization,
+/// and debugging purposes.
 impl Display for Level {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.name().as_ref())
+        f.write_str(self.name())
     }
 }
 
 /// Parses a `Level` from its string representation.
 ///
-/// This allows `Level` to be created from config files, environment
-/// variables, or user input such as "info", "debug", "error".
+/// This is typically used when loading configuration, parsing
+/// environment variables, or processing user input such as
+/// "info", "debug", or "error".
 impl FromStr for Level {
-    type Err = ();
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::from_name(s))
+        Self::from_name(s)
     }
 }
 
-/// Defines partial ordering behavior for `Level`.
+/// Defines partial ordering for `Level`.
 ///
-/// Required for comparisons like `level > other_level` where ordering
-/// is not strictly guaranteed for all possible values.
+/// This enables comparisons such as `level > other_level`.
+/// The ordering is based on severity values where lower numbers
+/// represent higher severity (more critical logs).
 impl PartialOrd for Level {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -194,8 +250,9 @@ impl PartialOrd for Level {
 
 /// Defines total ordering for `Level` based on severity.
 ///
-/// Higher severity levels are considered "less" in ordering due to
-/// `.reverse()`, so that more critical levels come first when sorted.
+/// Levels are ordered so that more critical logs come first when sorted.
+/// Internally, lower severity values represent higher priority, so the
+/// comparison is reversed to achieve descending severity order.
 impl Ord for Level {
     fn cmp(&self, other: &Self) -> Ordering {
         self.severity().cmp(&other.severity()).reverse()

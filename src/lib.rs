@@ -5,6 +5,7 @@ mod level;
 mod logger;
 mod processor;
 mod record;
+mod error;
 
 // Expose level enum at crate root
 pub use level::Level;
