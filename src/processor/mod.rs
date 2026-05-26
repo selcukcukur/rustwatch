@@ -1,27 +1,35 @@
 use crate::Record;
 
-/// Core trait for processing log records.
+/// Core trait for enriching a [`Record`] before it reaches any handler.
 ///
-/// A `Processor` is responsible for mutating a [`Record`] before it is
-/// passed to handlers or formatters in the logging pipeline.
+/// Processors run in registration order after the record is created and
+/// before it is passed to the handler chain. They mutate the record
+/// **in place** — typically adding keys to `record.context`.
 ///
-/// It can enrich the record with additional contextual metadata such as
-/// request identifiers, hostname, environment information, or runtime
-/// metrics. Processors are executed in registration order.
+/// **Safety**
+///
+/// All processors must be `Send + Sync` because the logger stores them
+/// behind an `Arc<Mutex<_>>`.
+///
+/// **Custom**
+/// ```rust,ignore
+/// use rustwatch::{Record, Processor};
+/// use serde_json::json;
+///
+/// struct RequestIdProcessor { id: String }
+///
+/// impl Processor for RequestIdProcessor {
+///     fn process(&self, record: &mut Record) {
+///         record.set_context_value("request_id", json!(self.id));
+///     }
+/// }
+/// ```
 pub trait Processor: Send + Sync {
-    /// Mutates the given `Record` by attaching additional metadata.
-    ///
-    /// **Parameters**
-    /// - `record` - The log record that will be modified in place.
+    /// Mutates `record` in place to attach additional metadata.
     fn process(&self, record: &mut Record);
 
-    /// Returns the execution order of this processor.
-    ///
-    /// Lower values are executed first, allowing fine-grained control
-    /// over processor ordering within the pipeline.
-    fn order(&self) -> usize {
-        0
-    }
+    /// Execution priority. Lower values run first. Defaults to `0`.
+    fn order(&self) -> usize { 0 }
 }
 
 // Internal modules for processor implementations
