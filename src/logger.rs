@@ -217,12 +217,12 @@ impl Logger {
             LoggerComponent::Handler(handler) => {
                 self.handlers.push(handler);
                 self.handlers
-                    .sort_by(|b, a| b.severity().cmp(&a.severity()));
+                    .sort_by(|b, a| b.order().cmp(&a.order()));
             }
             LoggerComponent::Processor(processor) => {
                 self.processors.push(processor);
                 self.processors
-                    .sort_by(|b, a| b.severity().cmp(&a.severity()));
+                    .sort_by(|b, a| b.order().cmp(&a.order()));
             }
         }
     }

@@ -15,11 +15,11 @@ pub trait Processor: Send + Sync {
     /// - `record` - The log record that will be modified in place.
     fn process(&self, record: &mut Record);
 
-    /// Returns the execution priority of this processor.
+    /// Returns the execution order of this processor.
     ///
     /// Lower values are executed first, allowing fine-grained control
     /// over processor ordering within the pipeline.
-    fn severity(&self) -> usize {
+    fn order(&self) -> usize {
         0
     }
 }

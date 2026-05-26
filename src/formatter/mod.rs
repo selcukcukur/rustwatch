@@ -18,6 +18,14 @@ pub trait Formatter: Send + Sync {
     /// **Returns**
     /// - `String` - The formatted log output as a string.
     fn format(&self, record: &Record) -> String;
+
+    /// Returns the execution order of this formatter.
+    ///
+    /// Lower values are executed first, allowing deterministic ordering
+    /// of formatters within a logger pipeline.
+    fn order(&self) -> usize {
+        0
+    }
 }
 
 // Internal modules for formatter implementations
