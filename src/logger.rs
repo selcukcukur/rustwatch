@@ -6,30 +6,45 @@ use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use serde_json::Value;
 
-/// Central logging component that manages handlers and processors.
+/// Core logger instance responsible for processing and dispatching log records.
 ///
-/// The `Logger` is responsible for creating log records, enriching them
-/// with processors, and dispatching them to handlers. Handlers determine
-/// where the logs are written (console, file, external service), while
-/// processors enrich records with metadata (e.g. user, request id).
+/// A `Logger` represents a named logging pipeline that processes log records
+/// through a sequence of processors and dispatches them to configured handlers.
+///
+/// It maintains internal runtime state such as recursion depth and cycle
+/// detection to safely support nested logging scenarios.
 pub struct Logger {
-    pub name: String,
-    pub timezone: String,
-    pub depth: usize,
-    pub fiber_depth: usize,
-    pub cycles: bool,
+    /// Logger identifier used for grouping and filtering logs
+    name: String,
+
+    /// Timezone used when formatting timestamps in log records
+    timezone: String,
+
+    /// Tracks nesting level of logging calls
+    depth: usize,
+
+    /// Tracks execution context depth (e.g. async/fiber systems)
+    fiber_depth: usize,
+
+    /// Prevents infinite logging recursion loops
+    cycles: bool,
+
+    /// Consume and output processed log records
     handlers: Vec<Box<dyn Handler>>,
+
+    /// Transform or enrich log records before output
     processors: Vec<Box<dyn Processor>>,
 }
 
-/// Unified component type for Logger with optional severity.
-pub enum LoggerComponent {
-    Handler(Box<dyn Handler>),
-    Processor(Box<dyn Processor>),
-}
-
 impl Logger {
-    /// Create a new logger with empty handler and processor lists.
+    /// Creates a new **Logger** instance.
+    ///
+    /// **Arguments**
+    /// - `name` - Logger identifier used for grouping and filtering logs
+    /// - `timezone` - Timezone identifier used for timestamp formatting
+    ///
+    /// **Returns**
+    /// - `self` - A fresh logger with no handlers or processors registered.
     pub fn new(name: impl Into<String>, timezone: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -42,124 +57,132 @@ impl Logger {
         }
     }
 
-    /// Log an emergency message to the logs.
+    /// Logs a message at **emergency** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn emergency(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Emergency, message, context);
     }
 
-    /// Log an alert message to the logs.
+    /// Logs a message at **alert** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn alert(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Alert, message, context);
     }
 
-    /// Log a critical message to the logs.
+    /// Logs a message at **critical** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn critical(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Critical, message, context);
     }
 
-    /// Log an error message to the logs.
+    /// Logs a message at **error** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn error(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Error, message, context);
     }
 
-    /// Log a warning message to the logs.
+    /// Logs a message at **warning** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn warning(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Warning, message, context);
     }
 
-    /// Log a notice to the logs.
+    /// Logs a message at **notice** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn notice(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Notice, message, context);
     }
 
-    /// Log an informational message to the logs.
+    /// Logs a message at **info** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn info(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Info, message, context);
     }
 
-    /// Log a debug message to the logs.
+    /// Logs a message at **debug** level.
     ///
-    /// **Parameters**
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// **Arguments**
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` - if at least one handler processed the record
     pub fn debug(&mut self, message: &str, context: Option<Value>) {
         self.write(Level::Debug, message, context);
     }
 
-    /// Log a message with an explicit severity level.
+    /// Logs a message with an explicit severity level.
     ///
-    /// **Parameters**
-    /// - `level` - Severity level of the log (e.g. `Level::Debug`, `Level::Info`).
-    /// - `message` - Log message string.
-    /// - `context` - Optional JSON context (default: `{}`).
+    /// **Arguments**
+    /// - `level` - Severity level of the log
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler.
+    /// - `true` - if at least one handler processed the record
     pub fn log(&mut self, level: Level, message: &str, context: Option<Value>) -> bool {
         self.write(level, message, context)
     }
 
-    /// Log a message with the given level and optional metadata.
+    /// Processes and dispatches a log record through the pipeline.
     ///
-    /// **Parameters**
-    /// - `level` - Severity of the log
-    /// - `message` - Log message string
-    /// - `context` - Optional JSON context (default: `{}`)
+    /// - `Stage 1` - Tracks recursion depth and prevents infinite loops
+    /// - `Stage 2` - Resolves timestamp using configured timezone
+    /// - `Stage 3` - Builds a **record** instance
+    /// - `Stage 5` - Runs processors (mutation/enrichment phase)
+    /// - `Stage 5` - Dispatches to handlers (output phase)
+    /// - `Stage 6` - Restores internal state after execution
+    ///
+    /// **Arguments**
+    /// - `level` - Severity level of the log
+    /// - `message` - Log message
+    /// - `context` - Optional structured metadata
     ///
     /// **Returns**
-    /// - `bool` → Whether the record was handled by any handler
+    /// - `true` if at least one handler successfully processed the record
+    ///
     pub fn write(&mut self, level: Level, message: &str, context: Option<Value>) -> bool {
         let log_depth = if self.cycles {
             self.fiber_depth += 1;
@@ -212,30 +235,43 @@ impl Logger {
         handled
     }
 
-    pub fn push(&mut self, component: LoggerComponent) {
-        match component {
-            LoggerComponent::Handler(handler) => {
-                self.handlers.push(handler);
-                self.handlers
-                    .sort_by(|b, a| b.order().cmp(&a.order()));
-            }
-            LoggerComponent::Processor(processor) => {
-                self.processors.push(processor);
-                self.processors
-                    .sort_by(|b, a| b.order().cmp(&a.order()));
-            }
-        }
+    /// Registers a new log handler in the logger pipeline.
+    ///
+    /// **Arguments**
+    /// - `handler` - The handler instance to register
+    pub fn add_handler(&mut self, handler: Box<dyn Handler>) {
+        self.handlers.push(handler);
+        self.handlers.sort_by(|b, a| b.order().cmp(&a.order()));
     }
 
-    pub fn pop(&mut self, is_handler: bool) -> Option<LoggerComponent> {
-        if is_handler {
-            self.handlers.pop().map(LoggerComponent::Handler)
-        } else {
-            self.processors.pop().map(LoggerComponent::Processor)
-        }
+    /// Registers a new log processor in the logger pipeline.
+    ///
+    /// **Arguments**
+    /// - `processor` - The processor instance to register
+    pub fn add_processor(&mut self, processor: Box<dyn Processor>) {
+        self.processors.push(processor);
+        self.processors.sort_by(|b, a| b.order().cmp(&a.order()));
     }
 
-    /// Flush the entire logger state (handlers, processors, depth)
+    /// Removes the most recently added log handler.
+    ///
+    /// **Returns**
+    /// - `Some(handler)` if a handler existed
+    /// - `None` if no handlers are registered
+    pub fn pop_handler(&mut self) -> Option<Box<dyn Handler>> {
+        self.handlers.pop()
+    }
+
+    /// Removes the most recently added log processor
+    ///
+    /// **Returns**
+    /// - `Some(processor)` if a processor existed
+    /// - `None` if no processors are registered
+    pub fn pop_processor(&mut self) -> Option<Box<dyn Processor>> {
+        self.processors.pop()
+    }
+
+    /// Resets the logger to its initial state.
     pub fn flush(&mut self) {
         self.handlers.clear();
         self.processors.clear();
@@ -244,17 +280,17 @@ impl Logger {
         self.cycles = false;
     }
 
-    /// Flush logger handlers
+    /// Removes all registered handlers from the logger.
     pub fn flush_handlers(&mut self) {
         self.handlers.clear();
     }
 
-    /// Flush logger processors
+    /// Removes all registered processors from the logger.
     pub fn flush_processors(&mut self) {
         self.processors.clear();
     }
 
-    /// Flush logger depth state
+    /// Resets internal execution state of the logger.
     pub fn flush_depth(&mut self) {
         self.depth = 0;
         self.fiber_depth = 0;
